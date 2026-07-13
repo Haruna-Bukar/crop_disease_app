@@ -3,6 +3,13 @@
 # dependencies
 node_modules/
 
+# Local ML training artifacts
+ml/data/
+ml/models/
+ml/logs/
+tools/
+.venv-ml/
+
 # Expo
 .expo/
 dist/

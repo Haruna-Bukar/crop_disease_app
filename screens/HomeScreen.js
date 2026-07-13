@@ -4,6 +4,10 @@ import Colors from "../utils/colors";
 import { getWeatherData }
 from "../services/WeatherService";
 import {
+  saveWeatherRecord,
+  getWeatherHistory,
+} from "../services/WeatherStorage";
+import {
   View,
   Text,
   StyleSheet,
@@ -25,9 +29,67 @@ export default function HomeScreen({ navigation }) {
   const [windSpeed, setWindSpeed] =
     useState("--");
 
-  useEffect(() => {
-    getLocation();
-  }, []);
+    const [averageHumidity, setAverageHumidity] =
+  useState(0);
+
+const [averageTemperature, setAverageTemperature] =
+  useState(0);
+
+const [averageWindSpeed, setAverageWindSpeed] =
+  useState(0);
+
+const [daysRecorded, setDaysRecorded] =
+  useState(0);
+  
+useEffect(() => {
+  getLocation();
+  loadHistory();
+}, []);
+
+  const loadHistory = async () => {
+
+  const history =
+    await getWeatherHistory();
+
+  setDaysRecorded(history.length);
+
+  if (history.length === 0) {
+    return;
+  }
+
+  const totalHumidity =
+    history.reduce(
+      (sum, item) =>
+        sum + item.humidity,
+      0
+    );
+
+  const totalTemperature =
+    history.reduce(
+      (sum, item) =>
+        sum + item.temperature,
+      0
+    );
+
+  const totalWind =
+    history.reduce(
+      (sum, item) =>
+        sum + item.windSpeed,
+      0
+    );
+
+  setAverageHumidity(
+    totalHumidity / history.length
+  );
+
+  setAverageTemperature(
+    totalTemperature / history.length
+  );
+
+  setAverageWindSpeed(
+    totalWind / history.length
+  );
+};
 
   const getLocation = async () => {
 
@@ -64,6 +126,13 @@ export default function HomeScreen({ navigation }) {
       setWindSpeed(
         weather.wind.speed
       );
+
+     await saveWeatherRecord({
+  date: new Date().toLocaleDateString(),
+  temperature: weather.main.temp,
+  humidity: weather.main.humidity,
+  windSpeed: weather.wind.speed,
+});
     }
 
     // GET LOCATION NAME
@@ -85,7 +154,77 @@ export default function HomeScreen({ navigation }) {
       );
     }
   };
+ // HUMIDITY SCORE
+let averageHumidityScore = 0;
 
+if (averageHumidity >= 85) {
+  averageHumidityScore = 40;
+}
+else if (averageHumidity >= 70) {
+  averageHumidityScore = 25;
+}
+else if (averageHumidity >= 60) {
+  averageHumidityScore = 15;
+}
+
+// TEMPERATURE SCORE
+let averageTemperatureScore = 0;
+
+if (
+  averageTemperature >= 20 &&
+  averageTemperature <= 30
+) {
+  averageTemperatureScore = 30;
+}
+else if (
+  averageTemperature >= 15 &&
+  averageTemperature <= 35
+) {
+  averageTemperatureScore = 15;
+}
+
+// WIND SCORE
+let averageWindScore = 0;
+
+if (averageWindSpeed >= 5) {
+  averageWindScore = 15;
+}
+else if (averageWindSpeed >= 2) {
+  averageWindScore = 10;
+}
+
+// TOTAL SCORE
+const totalRisk =
+  averageHumidityScore +
+  averageTemperatureScore +
+  averageWindScore;
+
+// DAYS FACTOR
+const dayFactor =
+  Math.min(daysRecorded / 5, 1);
+
+// PROBABILITY
+const probability =
+  Math.round(
+    ((totalRisk / 85) * 100) *
+    dayFactor
+  );
+
+// RISK LEVEL
+let risk = "";
+
+if (probability >= 80) {
+  risk = "Very High";
+}
+else if (probability >= 60) {
+  risk = "High";
+}
+else if (probability >= 30) {
+  risk = "Medium";
+}
+else {
+  risk = "Low";
+}
   
   return (
   <ScrollView
@@ -172,8 +311,28 @@ export default function HomeScreen({ navigation }) {
 
   <View style={styles.riskContainer}>
     <Text style={styles.riskText}>
-      🟡 Disease Risk: Medium
-    </Text>
+  🟡 Disease Risk: {risk}
+</Text>
+
+<Text
+  style={{
+    color: "#fff",
+    marginTop: 5,
+  }}
+>
+  Outbreak Probability:
+  {probability}%
+</Text>
+
+<Text
+  style={{
+    color: "#fff",
+    marginTop: 5,
+  }}
+>
+  Based on {daysRecorded}
+  day(s) of weather data
+</Text>
   </View>
 
 </TouchableOpacity>

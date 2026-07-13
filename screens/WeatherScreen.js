@@ -1,4 +1,7 @@
-import React from "react";
+import React, {
+  useState,
+  useEffect,
+} from "react";
 
 import {
   View,
@@ -6,6 +9,10 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
+
+import {
+  getWeatherHistory,
+} from "../services/WeatherStorage";
 
 import Colors from "../utils/colors";
 
@@ -18,50 +25,121 @@ export default function WeatherScreen({ route }) {
     location,
   } = route.params;
 
- // HUMIDITY SCORE
-let humidityScore = 0;
+  const [averageHumidity, setAverageHumidity] =
+  useState(0);
 
-if (humidity >= 85) {
-  humidityScore = 40;
-} else if (humidity >= 70) {
-  humidityScore = 25;
-} else if (humidity >= 60) {
-  humidityScore = 15;
+const [averageTemperature, setAverageTemperature] =
+  useState(0);
+
+const [averageWindSpeed, setAverageWindSpeed] =
+  useState(0);
+
+const [daysRecorded, setDaysRecorded] =
+  useState(0);
+
+const [weatherHistory, setWeatherHistory] =
+  useState([]);
+
+  useEffect(() => {
+  loadHistory();
+}, []);
+
+const loadHistory = async () => {
+
+  const history =
+    await getWeatherHistory();
+    setWeatherHistory(history);
+
+  setDaysRecorded(history.length);
+
+  if (history.length === 0) {
+    return;
+  }
+
+  const totalHumidity =
+    history.reduce(
+      (sum, item) =>
+        sum + item.humidity,
+      0
+    );
+
+  const totalTemperature =
+    history.reduce(
+      (sum, item) =>
+        sum + item.temperature,
+      0
+    );
+
+  const totalWind =
+    history.reduce(
+      (sum, item) =>
+        sum + item.windSpeed,
+      0
+    );
+
+  setAverageHumidity(
+    totalHumidity / history.length
+  );
+
+  setAverageTemperature(
+    totalTemperature / history.length
+  );
+
+  setAverageWindSpeed(
+    totalWind / history.length
+  );
+};
+
+ // HUMIDITY SCORE
+let averageHumidityScore = 0;
+
+if (averageHumidity>= 85) {
+  averageHumidityScore = 40;
+} else if (averageHumidity >= 70) {
+  averageHumidityScore = 25;
+} else if (averageHumidity >= 60) {
+  averageHumidityScore = 15;
 }
 
 // TEMPERATURE SCORE
-let temperatureScore = 0;
+let averageTemperatureScore = 0;
 
 if (
-  temperature >= 20 &&
-  temperature <= 30
+  averageTemperature >= 20 &&
+  averageTemperature <= 30
 ) {
-  temperatureScore = 30;
+  averageTemperatureScore = 30;
 } else if (
-  temperature >= 15 &&
-  temperature <= 35
+  averageTemperature >= 15 &&
+  averageTemperature <= 35
 ) {
-  temperatureScore = 15;
+  averageTemperatureScore = 15;
 }
 
 // WIND SCORE
-let windScore = 0;
+let averageWindScore = 0;
 
-if (windSpeed >= 5) {
-  windScore = 15;
-} else if (windSpeed >= 2) {
-  windScore = 10;
+if (averageWindSpeed >= 5) {
+  averageWindScore = 15;
+} else if (averageWindSpeed >= 2) {
+  averageWindScore = 10;
 }
 
 // TOTAL SCORE
 const totalRisk =
-  humidityScore +
-  temperatureScore +
-  windScore;
+  averageHumidityScore +
+  averageTemperatureScore +
+  averageWindScore;
 
 // OUTBREAK PROBABILITY
+const dayFactor =
+  Math.min(daysRecorded / 5, 1);
+
 const probability =
-  Math.round((totalRisk / 85) * 100);
+  Math.round(
+    ((totalRisk / 85) * 100) *
+    dayFactor
+  );
 
 // RISK LEVEL
 let risk = "";
@@ -85,11 +163,11 @@ if (risk === "Very High") {
 }
 else if (risk === "High") {
   recommendation =
-    "High disease risk detected. Monitor crops closely and prepare preventive control measures.";
+    "Sustained favorable weather conditions have been detected over several days. Disease outbreak probability is high and preventive action is recommended.";
 }
 else if (risk === "Medium") {
   recommendation =
-    "Moderate disease risk detected. Continue regular crop monitoring and maintain good field sanitation.";
+    "Moderate disease risk detected from accumulated weather conditions over multiple days. Continue monitoring crops and watch for early disease symptoms.";
 }
 else {
   recommendation =
@@ -164,26 +242,32 @@ else {
   <Text style={styles.riskTitle}>
     Disease Risk Prediction
   </Text>
-
   <Text style={styles.riskValue}>
-    {probability}%
-  </Text>
+  {probability}%
+</Text>
+
+<Text style={styles.riskDescription}>
+  {risk} Risk
+</Text>
 
   <Text style={styles.riskDescription}>
-    {risk} Risk
-  </Text>
+  Based on {daysRecorded} day(s)
+</Text>
 
-  <Text style={styles.riskDescription}>
-    Humidity Score: {humidityScore}
-  </Text>
+<Text style={styles.riskDescription}>
+  Avg Humidity:
+  {averageHumidity.toFixed(1)}%
+</Text>
 
-  <Text style={styles.riskDescription}>
-    Temperature Score: {temperatureScore}
-  </Text>
+<Text style={styles.riskDescription}>
+  Avg Temperature:
+  {averageTemperature.toFixed(1)}°C
+</Text>
 
-  <Text style={styles.riskDescription}>
-    Wind Score: {windScore}
-  </Text>
+<Text style={styles.riskDescription}>
+  Avg Wind:
+  {averageWindSpeed.toFixed(1)} m/s
+</Text>
 
 </View>
 
@@ -199,6 +283,43 @@ else {
         </Text>
 
       </View>
+
+      <View style={styles.historyCard}>
+
+  <Text style={styles.historyTitle}>
+    Last 5 Days Weather History
+  </Text>
+
+  {
+    weatherHistory.map((item, index) => (
+
+      <View
+        key={index}
+        style={styles.historyItem}
+      >
+
+        <Text style={styles.historyDate}>
+          {item.date}
+        </Text>
+
+        <Text style={styles.historyText}>
+          🌡 {item.temperature}°C
+        </Text>
+
+        <Text style={styles.historyText}>
+          💧 {item.humidity}%
+        </Text>
+
+        <Text style={styles.historyText}>
+          🌬 {item.windSpeed} m/s
+        </Text>
+
+      </View>
+
+    ))
+  }
+
+</View>
 
     </ScrollView>
 
@@ -309,5 +430,36 @@ const styles = StyleSheet.create({
     color: Colors.textDark,
     lineHeight: 24,
   },
+
+  historyCard: {
+  backgroundColor: Colors.white,
+  padding: 20,
+  borderRadius: 20,
+  marginTop: 20,
+  elevation: 4,
+},
+
+historyTitle: {
+  fontSize: 20,
+  fontWeight: "bold",
+  color: Colors.primary,
+  marginBottom: 15,
+},
+
+historyItem: {
+  borderBottomWidth: 1,
+  borderBottomColor: "#eee",
+  paddingVertical: 10,
+},
+
+historyDate: {
+  fontWeight: "bold",
+  color: Colors.primary,
+  marginBottom: 5,
+},
+
+historyText: {
+  color: Colors.textDark,
+},
 
 });
