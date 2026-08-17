@@ -39,11 +39,11 @@ def export_tflite(model):
         model
     )
 
-    converter.optimizations = [
-        tf.lite.Optimize.DEFAULT
-    ]
+   # converter.optimizations = [
+     #   tf.lite.Optimize.DEFAULT
+    #]
 
-    converter.representative_dataset = representative_dataset
+   # converter.representative_dataset = representative_dataset
 
     converter.target_spec.supported_ops = [
         tf.lite.OpsSet.TFLITE_BUILTINS

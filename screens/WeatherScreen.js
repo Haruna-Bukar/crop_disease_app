@@ -14,7 +14,22 @@ import {
   getWeatherHistory,
 } from "../services/WeatherStorage";
 
+import { getLastScan } from "../services/ScanStorage";
+import { getRiskForScreen } from "../utils/diseaseRisk";
+
 import Colors from "../utils/colors";
+
+function timeAgo(isoString) {
+  if (!isoString) return "";
+  const diffMs = Date.now() - new Date(isoString).getTime();
+  const diffMins = Math.round(diffMs / 60000);
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins} min ago`;
+  const diffHours = Math.round(diffMins / 60);
+  if (diffHours < 24) return `${diffHours} hr ago`;
+  const diffDays = Math.round(diffHours / 24);
+  return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+}
 
 export default function WeatherScreen({ route }) {
 
@@ -40,9 +55,18 @@ const [daysRecorded, setDaysRecorded] =
 const [weatherHistory, setWeatherHistory] =
   useState([]);
 
+const [lastScan, setLastScan] =
+  useState(null);
+
   useEffect(() => {
   loadHistory();
+  loadLastScan();
 }, []);
+
+const loadLastScan = async () => {
+  const scan = await getLastScan();
+  setLastScan(scan);
+};
 
 const loadHistory = async () => {
 
@@ -90,89 +114,16 @@ const loadHistory = async () => {
   );
 };
 
- // HUMIDITY SCORE
-let averageHumidityScore = 0;
-
-if (averageHumidity>= 85) {
-  averageHumidityScore = 40;
-} else if (averageHumidity >= 70) {
-  averageHumidityScore = 25;
-} else if (averageHumidity >= 60) {
-  averageHumidityScore = 15;
-}
-
-// TEMPERATURE SCORE
-let averageTemperatureScore = 0;
-
-if (
-  averageTemperature >= 20 &&
-  averageTemperature <= 30
-) {
-  averageTemperatureScore = 30;
-} else if (
-  averageTemperature >= 15 &&
-  averageTemperature <= 35
-) {
-  averageTemperatureScore = 15;
-}
-
-// WIND SCORE
-let averageWindScore = 0;
-
-if (averageWindSpeed >= 5) {
-  averageWindScore = 15;
-} else if (averageWindSpeed >= 2) {
-  averageWindScore = 10;
-}
-
-// TOTAL SCORE
-const totalRisk =
-  averageHumidityScore +
-  averageTemperatureScore +
-  averageWindScore;
-
-// OUTBREAK PROBABILITY
-const dayFactor =
-  Math.min(daysRecorded / 5, 1);
-
-const probability =
-  Math.round(
-    ((totalRisk / 85) * 100) *
-    dayFactor
+  // Single shared function decides disease-specific vs. generic vs.
+  // mechanical (mosaic virus) — same logic HomeScreen's preview card uses.
+  const riskResult = getRiskForScreen(
+    lastScan,
+    averageTemperature,
+    averageHumidity,
+    averageWindSpeed,
+    daysRecorded
   );
 
-// RISK LEVEL
-let risk = "";
-
-if (totalRisk >= 70) {
-  risk = "Very High";
-} else if (totalRisk >= 50) {
-  risk = "High";
-} else if (totalRisk >= 30) {
-  risk = "Medium";
-} else {
-  risk = "Low";
-}
-
-// AI RECOMMENDATION
-let recommendation = "";
-
-if (risk === "Very High") {
-  recommendation =
-    "Weather conditions are highly favorable for disease outbreaks. Immediate field inspection and preventive treatment are recommended.";
-}
-else if (risk === "High") {
-  recommendation =
-    "Sustained favorable weather conditions have been detected over several days. Disease outbreak probability is high and preventive action is recommended.";
-}
-else if (risk === "Medium") {
-  recommendation =
-    "Moderate disease risk detected from accumulated weather conditions over multiple days. Continue monitoring crops and watch for early disease symptoms.";
-}
-else {
-  recommendation =
-    "Current weather conditions are not highly favorable for disease development.";
-}
   return (
 
     <ScrollView
@@ -240,34 +191,51 @@ else {
       <View style={styles.riskCard}>
 
   <Text style={styles.riskTitle}>
-    Disease Risk Prediction
+    {riskResult.mode !== "generic"
+      ? `${riskResult.diseaseName} Outbreak Risk`
+      : "Disease Risk Prediction"}
   </Text>
-  <Text style={styles.riskValue}>
-  {probability}%
-</Text>
 
-<Text style={styles.riskDescription}>
-  {risk} Risk
-</Text>
+  {lastScan && (
+    <Text style={styles.scanBadge}>
+      Based on your last scan: {lastScan.diseaseName} ({timeAgo(lastScan.scannedAt)})
+    </Text>
+  )}
 
-  <Text style={styles.riskDescription}>
-  Based on {daysRecorded} day(s)
-</Text>
+  {riskResult.mode === "mechanical" ? (
+    <Text style={styles.riskDescription}>
+      {riskResult.notes}
+    </Text>
+  ) : (
+    <>
+      <Text style={styles.riskValue}>
+        {riskResult.probability}%
+      </Text>
 
-<Text style={styles.riskDescription}>
-  Avg Humidity:
-  {averageHumidity.toFixed(1)}%
-</Text>
+      <Text style={styles.riskDescription}>
+        {riskResult.level} Risk
+      </Text>
 
-<Text style={styles.riskDescription}>
-  Avg Temperature:
-  {averageTemperature.toFixed(1)}°C
-</Text>
+      <Text style={styles.riskDescription}>
+        Based on {daysRecorded} day(s)
+      </Text>
 
-<Text style={styles.riskDescription}>
-  Avg Wind:
-  {averageWindSpeed.toFixed(1)} m/s
-</Text>
+      <Text style={styles.riskDescription}>
+        Avg Humidity:
+        {averageHumidity.toFixed(1)}%
+      </Text>
+
+      <Text style={styles.riskDescription}>
+        Avg Temperature:
+        {averageTemperature.toFixed(1)}°C
+      </Text>
+
+      <Text style={styles.riskDescription}>
+        Avg Wind:
+        {averageWindSpeed.toFixed(1)} m/s
+      </Text>
+    </>
+  )}
 
 </View>
 
@@ -279,7 +247,7 @@ else {
         </Text>
 
         <Text style={styles.adviceText}>
-          {recommendation}
+          {riskResult.mode === "mechanical" ? riskResult.notes : riskResult.recommendation}
         </Text>
 
       </View>
@@ -396,6 +364,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+
+  scanBadge: {
+    color: Colors.white,
+    fontSize: 13,
+    opacity: 0.85,
+    marginBottom: 12,
+    fontStyle: "italic",
   },
 
   riskValue: {

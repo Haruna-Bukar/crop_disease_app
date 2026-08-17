@@ -15,6 +15,20 @@ import {
 
 import Colors from "../utils/colors";
 
+// 👇 Flip this to true when testing on the Android Studio emulator on your
+// PC, and back to false when testing on your physical phone via Expo Go.
+const USE_ANDROID_EMULATOR = false;
+
+const PORT = 5000;
+
+// Your PC's LAN IP, for the physical phone via Expo Go — update this
+// whenever you switch networks (home Wi-Fi, MiFi, etc.)
+const LAN_IP = "192.168.0.4";
+
+const API_URL = USE_ANDROID_EMULATOR
+  ? `http://10.0.2.2:${PORT}/predict`     // Android Studio emulator -> your PC's own localhost
+  : `http://${LAN_IP}:${PORT}/predict`;   // physical phone -> your PC's LAN IP
+
 export default function CameraScreen({ navigation }) {
 
   const [image, setImage] = useState(null);
@@ -40,8 +54,7 @@ export default function CameraScreen({ navigation }) {
     const result =
       await ImagePicker.launchImageLibraryAsync({
 
-        mediaTypes:
-          ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ["images"],
 
         allowsEditing: true,
 
@@ -90,20 +103,52 @@ export default function CameraScreen({ navigation }) {
     }
   };
 
-  // ANALYZE LEAF
-  const analyzeLeaf = () => {
+  // ANALYZE LEAF — sends the photo to the Flask API and waits for the
+  // real prediction + treatment info (this replaces the old fake timer).
+  const analyzeLeaf = async () => {
 
     setLoading(true);
 
-    setTimeout(() => {
+    const formData = new FormData();
+    formData.append("image", {
+      uri: image,
+      name: "leaf.jpg",
+      type: "image/jpeg",
+    });
 
+    try {
+      // No manual Content-Type header — fetch needs to generate its own
+      // multipart boundary, and overriding it breaks the upload.
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
       setLoading(false);
 
-     navigation.navigate("Result", {
-  image: image,
-});
+      if (!response.ok) {
+        Alert.alert(
+          "Prediction Failed",
+          data.error || "The server rejected the request."
+        );
+        return;
+      }
 
-    }, 3000);
+      navigation.navigate("Result", {
+        image: image,
+        result: data,
+      });
+
+    } catch (error) {
+      setLoading(false);
+      Alert.alert(
+        "Connection Error",
+        "Could not reach the server. Make sure app.py is running, your " +
+        "phone and PC share the same Wi-Fi, and API_URL is correct.\n\n" +
+        error.message
+      );
+    }
   };
 
   return (

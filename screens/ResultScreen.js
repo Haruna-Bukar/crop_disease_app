@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import {
   View,
@@ -9,23 +9,58 @@ import {
 } from "react-native";
 
 import Colors from "../utils/colors";
+import { saveScan } from "../services/ScanStorage";
+
+// Maps the backend's severity field to a color, same spirit as the
+// original hardcoded "#ffb703" amber you had for risk level.
+function riskColor(severity) {
+  switch ((severity || "").toLowerCase()) {
+    case "none":
+      return Colors.success;
+    case "medium":
+      return "#ffb703";
+    case "high":
+      return "#fb8500";
+    case "very high":
+      return Colors.danger;
+    default:
+      return Colors.textLight;
+  }
+}
 
 export default function ResultScreen({
   navigation,
   route,
 }) {
 
-  const image = route?.params?.image;
+  const { image, result } = route?.params || {};
 
-  // FAKE AI RESULT FOR NOW
-  const disease = "Tomato Early Blight";
+  // REAL prediction from the Flask API (falls back gracefully if
+  // something navigated here without a result, so the screen never
+  // crashes on missing data).
+  const info = result?.treatment_info;
 
-  const confidence = "97%";
+  const disease = info?.disease || result?.predicted_class || "Unknown";
 
-  const risk = "Medium";
+  const confidence = result?.confidence_percent || "N/A";
+
+  const risk = info?.severity || "Unknown";
 
   const recommendation =
-    "Apply copper-based fungicide and remove infected leaves.";
+    info?.treatment ||
+    "No treatment information on file yet for this class.";
+
+  // Remember this scan locally — feeds the weather risk bridge, the
+  // History screen, and Home's stats row, all from one saved record.
+  useEffect(() => {
+    if (result?.predicted_class) {
+      saveScan({
+        predictedClass: result.predicted_class,
+        confidence: result.confidence,
+        treatmentInfo: info,
+      });
+    }
+  }, [result?.predicted_class]);
 
   return (
 
@@ -69,7 +104,7 @@ export default function ResultScreen({
           Risk Level
         </Text>
 
-        <Text style={styles.risk}>
+        <Text style={[styles.risk, { color: riskColor(risk) }]}>
           {risk}
         </Text>
 
@@ -78,7 +113,14 @@ export default function ResultScreen({
       {/* RECOMMENDATION CARD */}
       <TouchableOpacity
       style={styles.recommendationCard}
-       onPress={() => navigation.navigate("Treatment")}
+       onPress={() => {
+         if (info) {
+           navigation.navigate("Treatment", {
+             info,
+             diseaseName: disease,
+           });
+         }
+       }}
        >
 
         <Text style={styles.recommendationTitle}>
@@ -88,6 +130,12 @@ export default function ResultScreen({
         <Text style={styles.recommendationText}>
           {recommendation}
         </Text>
+
+        {info && (
+          <Text style={styles.tapHint}>
+            Tap for full treatment details →
+          </Text>
+        )}
 
       </TouchableOpacity>
 
@@ -165,7 +213,6 @@ const styles = StyleSheet.create({
   risk: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#ffb703",
     marginTop: 5,
   },
 
@@ -189,6 +236,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.textDark,
     lineHeight: 24,
+  },
+
+  tapHint: {
+    fontSize: 13,
+    color: Colors.primary,
+    marginTop: 10,
+    fontWeight: "600",
   },
 
   button: {

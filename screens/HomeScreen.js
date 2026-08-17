@@ -7,6 +7,9 @@ import {
   saveWeatherRecord,
   getWeatherHistory,
 } from "../services/WeatherStorage";
+import { getLastScan, getScanStats } from "../services/ScanStorage";
+import { timeAgo } from "../utils/timeAgo";
+import { getRiskForScreen } from "../utils/diseaseRisk";
 import {
   View,
   Text,
@@ -40,11 +43,31 @@ const [averageWindSpeed, setAverageWindSpeed] =
 
 const [daysRecorded, setDaysRecorded] =
   useState(0);
+
+const [lastScan, setLastScan] =
+  useState(null);
+
+// `lastScan` feeds both the weather risk calculation AND the "Last Scan"
+// card below — it's the same local record, no need for two copies.
+const [scanStats, setScanStats] =
+  useState({ total: 0, lowRisk: 0, highRisk: 0 });
   
 useEffect(() => {
   getLocation();
   loadHistory();
+  loadLastScan();
+  loadScanStats();
 }, []);
+
+const loadScanStats = async () => {
+  const stats = await getScanStats();
+  setScanStats(stats);
+};
+
+const loadLastScan = async () => {
+  const scan = await getLastScan();
+  setLastScan(scan);
+};
 
   const loadHistory = async () => {
 
@@ -154,78 +177,29 @@ useEffect(() => {
       );
     }
   };
- // HUMIDITY SCORE
-let averageHumidityScore = 0;
 
-if (averageHumidity >= 85) {
-  averageHumidityScore = 40;
-}
-else if (averageHumidity >= 70) {
-  averageHumidityScore = 25;
-}
-else if (averageHumidity >= 60) {
-  averageHumidityScore = 15;
-}
-
-// TEMPERATURE SCORE
-let averageTemperatureScore = 0;
-
-if (
-  averageTemperature >= 20 &&
-  averageTemperature <= 30
-) {
-  averageTemperatureScore = 30;
-}
-else if (
-  averageTemperature >= 15 &&
-  averageTemperature <= 35
-) {
-  averageTemperatureScore = 15;
-}
-
-// WIND SCORE
-let averageWindScore = 0;
-
-if (averageWindSpeed >= 5) {
-  averageWindScore = 15;
-}
-else if (averageWindSpeed >= 2) {
-  averageWindScore = 10;
-}
-
-// TOTAL SCORE
-const totalRisk =
-  averageHumidityScore +
-  averageTemperatureScore +
-  averageWindScore;
-
-// DAYS FACTOR
-const dayFactor =
-  Math.min(daysRecorded / 5, 1);
-
-// PROBABILITY
-const probability =
-  Math.round(
-    ((totalRisk / 85) * 100) *
-    dayFactor
+  // Same shared function WeatherScreen uses — disease-specific if
+  // something's been scanned, generic fallback otherwise. This is the
+  // fix for the two screens showing different numbers: there's now only
+  // one place this logic lives.
+  const riskResult = getRiskForScreen(
+    lastScan,
+    averageTemperature,
+    averageHumidity,
+    averageWindSpeed,
+    daysRecorded
   );
 
-// RISK LEVEL
-let risk = "";
+  const riskLabel =
+    riskResult.mode === "mechanical"
+      ? "N/A"
+      : riskResult.level;
 
-if (probability >= 80) {
-  risk = "Very High";
-}
-else if (probability >= 60) {
-  risk = "High";
-}
-else if (probability >= 30) {
-  risk = "Medium";
-}
-else {
-  risk = "Low";
-}
-  
+  const riskCardTitle =
+    riskResult.mode !== "generic"
+      ? `🌦 ${riskResult.diseaseName} Risk`
+      : "🌦 Weather Risk Analysis";
+
   return (
   <ScrollView
     contentContainerStyle={styles.container}
@@ -246,18 +220,18 @@ else {
     <View style={styles.statsContainer}>
 
       <View style={styles.card}>
-        <Text style={styles.cardNumber}>24</Text>
+        <Text style={styles.cardNumber}>{scanStats.total}</Text>
         <Text style={styles.cardLabel}>Total Scans</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardNumber}>3</Text>
-        <Text style={styles.cardLabel}>Alerts</Text>
+        <Text style={styles.cardNumber}>{scanStats.lowRisk}</Text>
+        <Text style={styles.cardLabel}>Low Risk</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardNumber}>Low</Text>
-        <Text style={styles.cardLabel}>Risk</Text>
+        <Text style={styles.cardNumber}>{scanStats.highRisk}</Text>
+        <Text style={styles.cardLabel}>High Risk</Text>
       </View>
 
     </View>
@@ -276,7 +250,7 @@ else {
 >
 
   <Text style={styles.weatherTitle}>
-    🌦 Weather Risk Analysis
+    {riskCardTitle}
   </Text>
 
   <View style={styles.weatherRow}>
@@ -311,18 +285,20 @@ else {
 
   <View style={styles.riskContainer}>
     <Text style={styles.riskText}>
-  🟡 Disease Risk: {risk}
+  🟡 Disease Risk: {riskLabel}
 </Text>
 
-<Text
-  style={{
-    color: "#fff",
-    marginTop: 5,
-  }}
->
-  Outbreak Probability:
-  {probability}%
-</Text>
+{riskResult.mode !== "mechanical" && (
+  <Text
+    style={{
+      color: "#fff",
+      marginTop: 5,
+    }}
+  >
+    Outbreak Probability:
+    {riskResult.probability}%
+  </Text>
+)}
 
 <Text
   style={{
@@ -352,13 +328,21 @@ else {
         Last Scan
       </Text>
 
-      <Text style={styles.lastScanText}>
-        Tomato Early Blight Detected
-      </Text>
+      {lastScan ? (
+        <>
+          <Text style={styles.lastScanText}>
+            {lastScan.diseaseName} Detected
+          </Text>
 
-      <Text style={styles.lastScanTime}>
-        2 hours ago
-      </Text>
+          <Text style={styles.lastScanTime}>
+            {timeAgo(lastScan.scannedAt)}
+          </Text>
+        </>
+      ) : (
+        <Text style={styles.lastScanText}>
+          No scans yet — tap "Scan A Leaf Now" to get started.
+        </Text>
+      )}
     </View>
 
   </ScrollView>
@@ -461,30 +445,9 @@ cardLabel: {
   marginTop: 5,
 },
 
-weatherCard: {
-  width: "100%",
-  backgroundColor: Colors.primary,
-  borderRadius: 20,
-  padding: 20,
-  marginBottom: 25,
-},
-
-weatherTitle: {
-  color: Colors.white,
-  fontSize: 18,
-  fontWeight: "bold",
-  marginBottom: 15,
-},
-
 weatherText: {
   color: Colors.white,
   marginBottom: 8,
-},
-
-riskText: {
-  color: "#ffd166",
-  fontWeight: "bold",
-  marginTop: 10,
 },
 
 lastScanCard: {

@@ -1,0 +1,268 @@
+{
+  "Corn Cercospora leaf spot Gray leaf spot": {
+    "crop": "Maize",
+    "disease": "Gray Leaf Spot",
+    "cause": "Caused by the fungus Cercospora zeae-maydis.",
+    "symptoms": "Long rectangular gray or tan lesions on leaves that reduce photosynthesis.",
+    "recommendedChemical": "Mancozeb 80WP",
+    "alternativeChemical": "Propiconazole (Tilt 250EC)",
+    "dosage": "Follow the manufacturer's label. Do not exceed the recommended rate.",
+    "treatment": "Spray a recommended fungicide at the early stage of infection and repeat according to the product label.",
+    "prevention": "Use resistant varieties, rotate crops, destroy infected crop residue, and avoid continuous maize cultivation.",
+    "severity": "High",
+    "weatherRisk": {
+      "type": "fungal",
+      "idealTempMin": 24,
+      "idealTempMax": 30,
+      "humidityThreshold": 85,
+      "humidityDirection": "above",
+      "notes": "Favors warm nights, high humidity, and extended leaf wetness \u2014 especially in continuous corn or reduced-tillage fields."
+    }
+  },
+  "Corn Common rust": {
+    "crop": "Maize",
+    "disease": "Common Rust",
+    "cause": "Caused by the fungus Puccinia sorghi.",
+    "symptoms": "Small reddish-brown pustules on both sides of the leaves.",
+    "recommendedChemical": "Propiconazole (Tilt 250EC)",
+    "alternativeChemical": "Mancozeb 80WP",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Apply fungicide at the first appearance of symptoms.",
+    "prevention": "Use resistant hybrids and remove infected plant debris.",
+    "severity": "Medium",
+    "weatherRisk": {
+      "type": "fungal",
+      "idealTempMin": 16,
+      "idealTempMax": 25,
+      "humidityThreshold": 80,
+      "humidityDirection": "above",
+      "notes": "Favors cool, moist conditions with heavy dew. Spores spread further under windy conditions."
+    }
+  },
+  "Corn Northern Leaf Blight": {
+    "crop": "Maize",
+    "disease": "Northern Leaf Blight",
+    "cause": "Caused by Exserohilum turcicum.",
+    "symptoms": "Long cigar-shaped gray-green lesions on leaves.",
+    "recommendedChemical": "Azoxystrobin",
+    "alternativeChemical": "Propiconazole",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Spray fungicide when disease is first noticed.",
+    "prevention": "Crop rotation and resistant maize varieties.",
+    "severity": "High",
+    "weatherRisk": {
+      "type": "fungal",
+      "idealTempMin": 18,
+      "idealTempMax": 27,
+      "humidityThreshold": 80,
+      "humidityDirection": "above",
+      "notes": "Favors moderate temperatures with extended (6+ hour) periods of leaf wetness."
+    }
+  },
+  "Corn healthy": {
+    "crop": "Maize",
+    "disease": "Healthy",
+    "cause": "No disease detected.",
+    "symptoms": "Healthy green leaves.",
+    "recommendedChemical": "None",
+    "alternativeChemical": "None",
+    "dosage": "Not applicable.",
+    "treatment": "No treatment required.",
+    "prevention": "Maintain good farm management practices.",
+    "severity": "None",
+    "weatherRisk": {
+      "type": "none"
+    }
+  },
+  "Tomato Bacterial spot": {
+    "crop": "Tomato",
+    "disease": "Bacterial Spot",
+    "cause": "Caused by Xanthomonas species.",
+    "symptoms": "Small dark water-soaked spots on leaves and fruits.",
+    "recommendedChemical": "Kocide 2000 (Copper Hydroxide)",
+    "alternativeChemical": "Nordox Copper",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Spray copper-based bactericide at early infection.",
+    "prevention": "Use certified seed and avoid working with wet plants.",
+    "severity": "High",
+    "weatherRisk": {
+      "type": "bacterial",
+      "idealTempMin": 24,
+      "idealTempMax": 30,
+      "humidityThreshold": 80,
+      "humidityDirection": "above",
+      "notes": "Favors warm, wet weather. Spreads via splashing or wind-driven rain, often worse after storms."
+    }
+  },
+  "Tomato Early blight": {
+    "crop": "Tomato",
+    "disease": "Early Blight",
+    "cause": "Caused by Alternaria solani.",
+    "symptoms": "Brown concentric rings on older leaves.",
+    "recommendedChemical": "Ridomil Gold MZ",
+    "alternativeChemical": "Mancozeb 80WP",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Spray fungicide immediately after symptoms appear.",
+    "prevention": "Rotate crops and remove infected leaves.",
+    "severity": "High",
+    "weatherRisk": {
+      "type": "fungal",
+      "idealTempMin": 24,
+      "idealTempMax": 29,
+      "humidityThreshold": 75,
+      "humidityDirection": "above",
+      "notes": "Favors warm weather with alternating wet and dry periods, often on older or stressed plants."
+    }
+  },
+  "Tomato Late blight": {
+    "crop": "Tomato",
+    "disease": "Late Blight",
+    "cause": "Caused by Phytophthora infestans.",
+    "symptoms": "Dark water-soaked lesions with white mold underneath leaves.",
+    "recommendedChemical": "Ridomil Gold MZ",
+    "alternativeChemical": "Acrobat Plus",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Spray immediately and repeat according to the product label.",
+    "prevention": "Avoid overhead irrigation and destroy infected plants.",
+    "severity": "Very High",
+    "weatherRisk": {
+      "type": "oomycete",
+      "idealTempMin": 15,
+      "idealTempMax": 21,
+      "humidityThreshold": 90,
+      "humidityDirection": "above",
+      "notes": "Favors cool, wet, overcast weather \u2014 classic 'late blight weather'. Can devastate a crop within days once established."
+    }
+  },
+  "Tomato Leaf Mold": {
+    "crop": "Tomato",
+    "disease": "Leaf Mold",
+    "cause": "Caused by Passalora fulva.",
+    "symptoms": "Yellow spots on upper leaves with olive-green mold underneath.",
+    "recommendedChemical": "Bravo 720",
+    "alternativeChemical": "Mancozeb",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Apply fungicide and improve greenhouse ventilation.",
+    "prevention": "Reduce humidity and avoid overcrowding.",
+    "severity": "Medium",
+    "weatherRisk": {
+      "type": "fungal",
+      "idealTempMin": 21,
+      "idealTempMax": 24,
+      "humidityThreshold": 85,
+      "humidityDirection": "above",
+      "notes": "Favors high humidity and moderate temperatures, especially in greenhouses or densely spaced plants with poor airflow."
+    }
+  },
+  "Tomato Septoria leaf spot": {
+    "crop": "Tomato",
+    "disease": "Septoria Leaf Spot",
+    "cause": "Caused by Septoria lycopersici.",
+    "symptoms": "Small circular spots with gray centers and dark margins.",
+    "recommendedChemical": "Mancozeb 80WP",
+    "alternativeChemical": "Chlorothalonil",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Spray fungicide and remove infected foliage.",
+    "prevention": "Crop rotation and sanitation.",
+    "severity": "Medium",
+    "weatherRisk": {
+      "type": "fungal",
+      "idealTempMin": 20,
+      "idealTempMax": 25,
+      "humidityThreshold": 80,
+      "humidityDirection": "above",
+      "notes": "Favors warm, wet conditions. Spores spread by splashing rain or overhead irrigation."
+    }
+  },
+  "Tomato Spider mites Two spotted spider mite": {
+    "crop": "Tomato",
+    "disease": "Two-Spotted Spider Mite",
+    "cause": "Infestation by Tetranychus urticae.",
+    "symptoms": "Tiny yellow speckles, leaf bronzing, and webbing.",
+    "recommendedChemical": "Abamectin",
+    "alternativeChemical": "Vertimec",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Apply miticide at the first sign of infestation.",
+    "prevention": "Monitor crops regularly and control weeds.",
+    "severity": "Medium",
+    "weatherRisk": {
+      "type": "pest",
+      "idealTempMin": 27,
+      "idealTempMax": 35,
+      "humidityThreshold": 50,
+      "humidityDirection": "below",
+      "notes": "Unlike fungal diseases, mites thrive in HOT, DRY conditions \u2014 risk rises as humidity drops, not as it rises."
+    }
+  },
+  "Tomato Target Spot": {
+    "crop": "Tomato",
+    "disease": "Target Spot",
+    "cause": "Caused by Corynespora cassiicola.",
+    "symptoms": "Circular brown lesions with concentric rings.",
+    "recommendedChemical": "Azoxystrobin",
+    "alternativeChemical": "Mancozeb",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Apply fungicide according to label directions.",
+    "prevention": "Improve air circulation and avoid excessive irrigation.",
+    "severity": "High",
+    "weatherRisk": {
+      "type": "fungal",
+      "idealTempMin": 24,
+      "idealTempMax": 29,
+      "humidityThreshold": 80,
+      "humidityDirection": "above",
+      "notes": "Favors warm, humid conditions with extended leaf wetness."
+    }
+  },
+  "Tomato Tomato YellowLeaf Curl Virus": {
+    "crop": "Tomato",
+    "disease": "Tomato Yellow Leaf Curl Virus",
+    "cause": "Spread by whiteflies.",
+    "symptoms": "Yellow curled leaves and stunted growth.",
+    "recommendedChemical": "Imidacloprid",
+    "alternativeChemical": "Actara",
+    "dosage": "Follow the manufacturer's label.",
+    "treatment": "Control whiteflies immediately and remove infected plants.",
+    "prevention": "Use resistant varieties and insect-proof nets.",
+    "severity": "Very High",
+    "weatherRisk": {
+      "type": "viral_vector",
+      "idealTempMin": 27,
+      "idealTempMax": 35,
+      "humidityThreshold": 55,
+      "humidityDirection": "below",
+      "notes": "Spread by whiteflies, whose populations explode in hot, dry weather. Humidity itself isn't the driver \u2014 whitefly activity is."
+    }
+  },
+  "Tomato Tomato mosaic virus": {
+    "crop": "Tomato",
+    "disease": "Tomato Mosaic Virus",
+    "cause": "Viral infection spread by contaminated tools and handling.",
+    "symptoms": "Mosaic leaf patterns, distortion, and reduced yield.",
+    "recommendedChemical": "None (virus has no cure)",
+    "alternativeChemical": "None",
+    "dosage": "Not applicable.",
+    "treatment": "Remove infected plants immediately and disinfect tools.",
+    "prevention": "Use certified seed and practice strict sanitation.",
+    "severity": "Very High",
+    "weatherRisk": {
+      "type": "mechanical",
+      "notes": "Spreads mainly through contaminated hands, tools, and plant-to-plant contact rather than weather conditions. Sanitation matters far more here than forecast."
+    }
+  },
+  "Tomato healthy": {
+    "crop": "Tomato",
+    "disease": "Healthy",
+    "cause": "No disease detected.",
+    "symptoms": "Healthy green leaves and vigorous growth.",
+    "recommendedChemical": "None",
+    "alternativeChemical": "None",
+    "dosage": "Not applicable.",
+    "treatment": "No treatment required.",
+    "prevention": "Continue good agricultural practices.",
+    "severity": "None",
+    "weatherRisk": {
+      "type": "none"
+    }
+  }
+}

@@ -9,7 +9,28 @@ import {
 
 import Colors from "../utils/colors";
 
-export default function TreatmentScreen() {
+export default function TreatmentScreen({ route }) {
+
+  const { info, diseaseName } = route?.params || {};
+
+  // Defensive fallback — only reachable if something links here without
+  // passing treatment info (e.g. a class not yet in disease_database.json).
+  if (!info) {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>
+          AI Treatment Advice
+        </Text>
+        <View style={styles.card}>
+          <Text style={styles.text}>
+            No treatment information is on file yet for{" "}
+            {diseaseName || "this class"}. Add an entry to
+            disease_database.json to cover it.
+          </Text>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
 
@@ -27,7 +48,32 @@ export default function TreatmentScreen() {
         </Text>
 
         <Text style={styles.disease}>
-          Tomato Early Blight
+          {diseaseName || info.disease}
+        </Text>
+
+        <Text style={styles.metaText}>
+          Crop: {info.crop}   •   Severity: {info.severity}
+        </Text>
+
+      </View>
+
+      {/* Cause + Symptoms */}
+      <View style={styles.card}>
+
+        <Text style={styles.heading}>
+          Cause
+        </Text>
+
+        <Text style={styles.text}>
+          {info.cause}
+        </Text>
+
+        <Text style={[styles.heading, { marginTop: 15 }]}>
+          Symptoms
+        </Text>
+
+        <Text style={styles.text}>
+          {info.symptoms}
         </Text>
 
       </View>
@@ -40,8 +86,36 @@ export default function TreatmentScreen() {
         </Text>
 
         <Text style={styles.text}>
-          Apply copper-based fungicide every 7 days.
-          Remove infected leaves immediately to stop spread.
+          {info.treatment}
+        </Text>
+
+      </View>
+
+      {/* Chemicals + Dosage */}
+      <View style={styles.card}>
+
+        <Text style={styles.heading}>
+          Recommended Chemical
+        </Text>
+
+        <Text style={styles.text}>
+          {info.recommendedChemical}
+        </Text>
+
+        <Text style={[styles.heading, { marginTop: 15 }]}>
+          Alternative Chemical
+        </Text>
+
+        <Text style={styles.text}>
+          {info.alternativeChemical}
+        </Text>
+
+        <Text style={[styles.heading, { marginTop: 15 }]}>
+          Dosage
+        </Text>
+
+        <Text style={styles.text}>
+          {info.dosage}
         </Text>
 
       </View>
@@ -54,24 +128,7 @@ export default function TreatmentScreen() {
         </Text>
 
         <Text style={styles.text}>
-          Avoid overhead watering.
-          Maintain proper plant spacing.
-          Rotate crops regularly.
-        </Text>
-
-      </View>
-
-      {/* AI Advice */}
-      <View style={styles.card}>
-
-        <Text style={styles.heading}>
-          AI Farming Advice
-        </Text>
-
-        <Text style={styles.text}>
-          Based on environmental conditions,
-          humidity appears favorable for fungal spread.
-          Monitor nearby plants carefully over the next 5 days.
+          {info.prevention}
         </Text>
 
       </View>
@@ -115,6 +172,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: Colors.danger,
+  },
+
+  metaText: {
+    fontSize: 14,
+    color: Colors.textLight,
+    marginTop: 8,
   },
 
   text: {
