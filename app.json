@@ -21,10 +21,29 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.CropDiseaseApp"
+      "package": "com.anonymous.CropDiseaseApp",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app needs access to your photos so you can upload leaf images for analysis.",
+          "cameraPermission": "Allow the app to open the camera to scan crop leaves."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ed819e11-56b5-4918-aeda-3aa7357bc5b2"
+      }
     }
   }
 }
